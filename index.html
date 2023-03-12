@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Memory Leak</title>
+</head>
+<body>
+	<button onclick="add()">新增有綁定事件的元件</button>
+	<button onclick="remove()">移除有綁定事件的元件</button>
+	<div class="list">
+	</div>
+	<script>
+		/**
+		 * 測試步驟
+		 * 
+		 * 1. Heap snapshot
+		 * 2. 點新增
+		 * 3. 點移除
+		 * 4. 點擊執行garbage collect
+		 * 5. Heap snapshot 並比較，找是否有多出AAAObject、Detached HTMLDivElement
+		 * */
+
+		// 使用特別的名稱，方便在Heap comparison找到
+		class AAAObject{}
+
+		function add(){
+			var el = document.createElement('div');
+			el.classList.add('item')
+			el.innerHTML ='teset'
+			
+			var aaa = new AAAObject();
+
+			el.onclick=function(){
+				var k = aaa
+			}
+
+			document.querySelector('.list').append(el)
+		}
+
+		function remove(){
+			/**
+			 * 這邊會造成memory list
+			 * 
+			 * - Heap Snapshots會多出一個AAAObject、Detached HTMLDivElement下會有個名為el的項目
+			 * */
+			el = document.querySelector('.list .item')
+			el.remove()
+
+			/**
+			 * 解決
+			 * - remove el後將el = null
+			 * - 或，將el改為function scope變數
+			*/
+			// el = null
+		}
+	</script>
+</body>
+</html>
